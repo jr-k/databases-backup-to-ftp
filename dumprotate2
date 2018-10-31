@@ -1,0 +1,122 @@
+#!/bin/bash
+
+DATE=$(date +"%Y%m%d_%H%M%S")
+ROTATE=10
+ROOM="default"
+DUMPDIR=/home/dbdumps
+DB_USER=""
+DB_PWD=""
+DATABASEONLY="__empty__none__"
+
+for i in "$@"
+do
+case $i in
+    -r=*|--rotate=*)
+    ROTATE="${i#*=}"
+    shift # past argument=value
+    ;;
+    -c=*|--crondir=*)
+    ROOM="${i#*=}"
+    shift # past argument=value
+    ;;
+    -o=*|--output=*)
+    DUMPDIR="${i#*=}"
+    shift # past argument=value
+    ;;
+    -u=*|--dbuser=*)
+    DB_USER="${i#*=}"
+    shift # past argument=value
+    ;;
+    -p=*|--dbpwd=*)
+    DB_PWD="${i#*=}"
+    shift # past argument=value
+    ;;
+    -d=*|--database=*)
+    DATABASEONLY="${i#*=}"
+    shift # past argument=value
+    ;;
+    -h|--help)
+    echo "Usage: dumprotate2 [-options]"
+    echo "where options include:"
+    echo "	-r | --rotate		rotate counter (e.g: -r=10, default: $ROTATE)"
+    echo "	-c | --crondir		cron directory, useful when you want to store dump in many ways  (e.g: -c=hourly, default: $ROOM)"
+    echo "	-o | --output		output directory, location where all dumps will be stored (e.g: -o=/home/dumps, default: /home/dbdumps)"
+    echo "	-u | --dbuser		database username"
+    echo "	-p | --dbpwd		database password"
+    echo "	-d | --database		dumps only a specific database"
+    echo "	-h | --help		shows this help"
+    exit 0
+    ;;
+    *)
+          # unknown option
+    ;;
+esac
+done
+
+if [[ ! $ROTATE =~ ^[0-9]+$ ]]; then
+      echo "Error: -r=*|--rotate=* parameter must be a number" && exit 1
+fi
+
+if [[ ! $ROOM =~ ^[a-z]+$ ]]; then
+      echo "Error: -c=*|--crondir=* parameter must be a lowercase word" && exit 1
+fi
+
+if [[ ! $DATABASEONLY =~ ^[a-zA-Z_0-9]+$ ]]; then
+      echo "Error: -d=*|--database=* parameter must be a database name" && exit 1
+fi
+
+echo "======= START"
+echo "Working Directory: $DUMPDIR"
+echo "Rotate Counter: $ROTATE"
+echo "Room Name: $ROOM"
+echo "Database User: $DB_USER"
+echo "======="
+
+for dir in $DUMPDIR/*/; do
+	dir=${dir::-1}
+	database=${dir/$DUMPDIR\//}
+
+	[ ! $DATABASEONLY == "__empty__none__" ]
+	specificDatabase=$?
+
+	if [[ $specificDatabase == "0" ]]
+	then
+		if [[ ! $DATABASEONLY == $database ]]
+		then
+			continue
+		fi
+	fi
+
+	[ $database == "*" ]
+	nodirdb=$?
+
+	if [[ $nodirdb == "0" ]]
+	then
+		echo "Error: You must have at least one directory named with one existing database in $DUMPDIR"
+		exit 1
+	fi
+
+	echo "Dump database: $database"
+
+	mkdir -p $DUMPDIR/$database/$ROOM
+
+	/usr/bin/mysqldump --user=$DB_USER --password=$DB_PWD --databases $database > $DUMPDIR/$database/$ROOM/db_$database_$DATE.sql && gzip $DUMPDIR/$database/$ROOM/db_$database_$DATE.sql
+
+	counter=$(find $DUMPDIR/$database/$ROOM/ -maxdepth 1 -type f | wc -l)
+	#echo "Dump counter: $counter"
+
+	dumps=$(ls -1 $DUMPDIR/$database/$ROOM/ | sort -r)
+	cpt=0
+	for dump in $dumps
+	do
+		((cpt+=1))
+		if [ $cpt -gt $ROTATE ]
+		then
+			#echo "REMOTE FILE $cpt/$ROTATE"
+			rm $DUMPDIR/$database/$ROOM/$dump
+		fi
+	done
+
+done
+
+echo "======= END"

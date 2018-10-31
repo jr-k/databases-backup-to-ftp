@@ -57,7 +57,7 @@ if [[ ! $ROTATE =~ ^[0-9]+$ ]]; then
       echo "Error: -r=*|--rotate=* parameter must be a number" && exit 1
 fi
 
-if [[ ! $ROOM =~ ^[a-z]+$ ]]; then
+if [[ ! $ROOM =~ ^[a-zA-Z0-9_]+$ ]]; then
       echo "Error: -c=*|--crondir=* parameter must be a lowercase word" && exit 1
 fi
 

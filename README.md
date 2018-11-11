@@ -13,7 +13,7 @@ where options include:
 -	`-h | --help`		shows this help
 
 Crontab entries
-- `* * * * * /usr/local/sbin/dumprotate2 -r=3 -c="minutely1"`
+- `* * * * * /usr/local/sbin/dumprotate2 -r=60 -c="minutely1"`
 - `*/5 * * * * /usr/local/sbin/dumprotate2 -r=12 -c="minutely5"`
 - `0 * * * * /usr/local/sbin/dumprotate2 -r=24 -c="hourly"`
 - `0 1 * * * /usr/local/sbin/dumprotate2 -r=30 -c="daily"`

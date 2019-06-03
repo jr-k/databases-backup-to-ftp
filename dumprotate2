@@ -112,7 +112,7 @@ for dir in $DUMPDIR/*/; do
 		((cpt+=1))
 		if [ $cpt -gt $ROTATE ]
 		then
-			#echo "REMOTE FILE $cpt/$ROTATE"
+			#echo "REMOVE FILE $cpt/$ROTATE"
 			rm $DUMPDIR/$database/$ROOM/$dump
 		fi
 	done

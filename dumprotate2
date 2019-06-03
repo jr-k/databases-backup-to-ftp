@@ -7,6 +7,10 @@ DUMPDIR=/home/dbdumps
 DB_USER=""
 DB_PWD=""
 DATABASEONLY="__empty__none__"
+FTP_HOST=""
+FTP_PORT="21"
+FTP_USER=""
+FTP_PWD=""
 
 for i in "$@"
 do
@@ -35,6 +39,22 @@ case $i in
     DATABASEONLY="${i#*=}"
     shift # past argument=value
     ;;
+     -u=*|--ftpuser=*)
+    FTP_USER="${i#*=}"
+    shift # past argument=value
+    ;;
+    -w=*|--ftppwd=*)
+    FTP_PWD="${i#*=}"
+    shift # past argument=value
+    ;;
+    -s=*|--ftphost=*)
+    FTP_HOST="${i#*=}"
+    shift # past argument=value
+    ;;
+    -p=*|--ftpport=*)
+    FTP_PORT="${i#*=}"
+    shift # past argument=value
+    ;;
     -h|--help)
     echo "Usage: dumprotate2 [-options]"
     echo "where options include:"
@@ -44,6 +64,10 @@ case $i in
     echo "	-u | --dbuser		database username"
     echo "	-p | --dbpwd		database password"
     echo "	-d | --database		dumps only a specific database"
+    echo "  	-u | --ftpuser		ftp username"
+    echo "	-w | --ftppwd		ftp password"
+    echo "	-s | --ftphost		ftp host"
+    echo "	-p | --ftpport		ftp port"
     echo "	-h | --help		shows this help"
     exit 0
     ;;
@@ -70,7 +94,39 @@ echo "Working Directory: $DUMPDIR"
 echo "Rotate Counter: $ROTATE"
 echo "Room Name: $ROOM"
 echo "Database User: $DB_USER"
+echo "FTP Host: $FTP_HOST"
+echo "FTP Port: $FTP_PORT"
+echo "FTP User: $FTP_USER"
 echo "======="
+
+createDir() {
+    ftp -n $FTP_HOST $FTP_PORT <<END_SCRIPT
+quote USER $FTP_USER
+quote PASS $FTP_PWD
+mkdir $1
+mkdir $1/$ROOM
+quit
+END_SCRIPT
+}
+
+uploadBackup() {
+    ftp -n $FTP_HOST $FTP_PORT <<END_SCRIPT
+quote USER $FTP_USER
+quote PASS $FTP_PWD
+binary
+put $1 $2
+quit
+END_SCRIPT
+}
+
+deleteFile() {
+    ftp -n $FTP_HOST $FTP_PORT <<END_SCRIPT
+quote USER $FTP_USER
+quote PASS $FTP_PWD
+delete $1
+quit
+END_SCRIPT
+}
 
 for dir in $DUMPDIR/*/; do
 	dir=${dir::-1}
@@ -99,8 +155,13 @@ for dir in $DUMPDIR/*/; do
 	echo "Dump database: $database"
 
 	mkdir -p $DUMPDIR/$database/$ROOM
+	createDir $database
+	
+	RELATIVE_OUTPUTFILE="$database/$ROOM/db_$database_$DATE.sql"
+	OUTPUTFILE="$DUMPDIR/$RELATIVE_OUTPUTFILE"
 
-	/usr/bin/mysqldump --user=$DB_USER --password=$DB_PWD --databases $database > $DUMPDIR/$database/$ROOM/db_$database_$DATE.sql && gzip $DUMPDIR/$database/$ROOM/db_$database_$DATE.sql
+	/usr/bin/mysqldump --user=$DB_USER --password=$DB_PWD --databases $database > $OUTPUTFILE && gzip $OUTPUTFILE
+	uploadBackup $OUTPUTFILE $RELATIVE_OUTPUTFILE
 
 	counter=$(find $DUMPDIR/$database/$ROOM/ -maxdepth 1 -type f | wc -l)
 	#echo "Dump counter: $counter"
@@ -114,6 +175,7 @@ for dir in $DUMPDIR/*/; do
 		then
 			#echo "REMOVE FILE $cpt/$ROTATE"
 			rm $DUMPDIR/$database/$ROOM/$dump
+			deleteFile $database/$ROOM/$dump
 		fi
 	done
 

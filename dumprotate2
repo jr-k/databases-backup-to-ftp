@@ -27,7 +27,7 @@ case $i in
     DUMPDIR="${i#*=}"
     shift # past argument=value
     ;;
-    -u=*|--dbuser=*)
+    -n=*|--dbuser=*)
     DB_USER="${i#*=}"
     shift # past argument=value
     ;;
@@ -39,7 +39,7 @@ case $i in
     DATABASEONLY="${i#*=}"
     shift # past argument=value
     ;;
-     -u=*|--ftpuser=*)
+    -u=*|--ftpuser=*)
     FTP_USER="${i#*=}"
     shift # past argument=value
     ;;
@@ -51,7 +51,7 @@ case $i in
     FTP_HOST="${i#*=}"
     shift # past argument=value
     ;;
-    -p=*|--ftpport=*)
+    -t=*|--ftpport=*)
     FTP_PORT="${i#*=}"
     shift # past argument=value
     ;;
@@ -61,13 +61,13 @@ case $i in
     echo "	-r | --rotate		rotate counter (e.g: -r=10, default: $ROTATE)"
     echo "	-c | --crondir		cron directory, useful when you want to store dump in many ways  (e.g: -c=hourly, default: $ROOM)"
     echo "	-o | --output		output directory, location where all dumps will be stored (e.g: -o=/home/dumps, default: /home/dbdumps)"
-    echo "	-u | --dbuser		database username"
+    echo "	-n | --dbuser		database username"
     echo "	-p | --dbpwd		database password"
     echo "	-d | --database		dumps only a specific database"
     echo "  	-u | --ftpuser		ftp username"
     echo "	-w | --ftppwd		ftp password"
     echo "	-s | --ftphost		ftp host"
-    echo "	-p | --ftpport		ftp port"
+    echo "	-t | --ftpport		ftp port"
     echo "	-h | --help		shows this help"
     exit 0
     ;;

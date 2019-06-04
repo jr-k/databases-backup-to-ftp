@@ -1,8 +1,8 @@
-# dumprotate2
+# dbtf
 Simple database dump rotate system
 
 # help
-Usage: `dumprotate2 [-options]`<br />
+Usage: `dbtf [-options]`<br />
 where options include:
 -	`-r | --rotate`		rotate counter (e.g: -r=10, default: 10)
 -	`-c | --crondir`		cron directory, useful to store dump in different cron (e.g: -c=hourly, default: default)
@@ -17,9 +17,9 @@ where options include:
 -	`-h | --help`		shows this help
 
 Crontab entries
-- `* * * * * /usr/local/sbin/dumprotate2 -r=60 -c="minutely1"`
-- `*/5 * * * * /usr/local/sbin/dumprotate2 -r=12 -c="minutely5"`
-- `0 * * * * /usr/local/sbin/dumprotate2 -r=24 -c="hourly"`
-- `0 1 * * * /usr/local/sbin/dumprotate2 -r=30 -c="daily"`
-- `0 0 * * 0 /usr/local/sbin/dumprotate2 -r=52 -c="weekly"`
-- `0 0 1 * * /usr/local/sbin/dumprotate2 -r=12 -c="monthly"`
+- `* * * * * /usr/local/sbin/dbtf -r=60 -c="minutely1"`
+- `*/5 * * * * /usr/local/sbin/dbtf -r=12 -c="minutely5"`
+- `0 * * * * /usr/local/sbin/dbtf -r=24 -c="hourly"`
+- `0 1 * * * /usr/local/sbin/dbtf -r=30 -c="daily"`
+- `0 0 * * 0 /usr/local/sbin/dbtf -r=52 -c="weekly"`
+- `0 0 1 * * /usr/local/sbin/dbtf -r=12 -c="monthly"`

@@ -161,7 +161,7 @@ for dir in $DUMPDIR/*/; do
 	OUTPUTFILE="$DUMPDIR/$RELATIVE_OUTPUTFILE"
 
 	/usr/bin/mysqldump --user=$DB_USER --password=$DB_PWD --databases $database > $OUTPUTFILE && gzip $OUTPUTFILE
-	uploadBackup $OUTPUTFILE $RELATIVE_OUTPUTFILE
+	uploadBackup "$OUTPUTFILE.gz" "$RELATIVE_OUTPUTFILE.gz"
 
 	counter=$(find $DUMPDIR/$database/$ROOM/ -maxdepth 1 -type f | wc -l)
 	#echo "Dump counter: $counter"

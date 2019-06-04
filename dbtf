@@ -56,7 +56,7 @@ case $i in
     shift # past argument=value
     ;;
     -h|--help)
-    echo "Usage: dumprotate2 [-options]"
+    echo "Usage: dbtf [-options]"
     echo "where options include:"
     echo "	-r | --rotate		rotate counter (e.g: -r=10, default: $ROTATE)"
     echo "	-c | --crondir		cron directory, useful when you want to store dump in many ways  (e.g: -c=hourly, default: $ROOM)"

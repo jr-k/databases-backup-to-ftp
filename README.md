@@ -1,5 +1,5 @@
 # dbtf
-Simple database dump rotate system
+Simple database dump rotate system  (optionnally send to ftp server)
 
 # help
 Usage: `dbtf [-options]`<br />

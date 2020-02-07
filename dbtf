@@ -4,6 +4,7 @@ DATE=$(date +"%Y%m%d_%H%M%S")
 ROTATE=10
 ROOM="default"
 DUMPDIR=/home/dbdumps
+DB_HOST=""
 DB_USER=""
 DB_PWD=""
 DATABASEONLY="__empty__none__"
@@ -26,6 +27,10 @@ case $i in
     -o=*|--output=*)
     DUMPDIR="${i#*=}"
     shift # past argument=value
+    ;;
+    -z=*|--dbhost=*)
+    DB_HOST="${i#*=}"
+    shift
     ;;
     -n=*|--dbuser=*)
     DB_USER="${i#*=}"
@@ -143,8 +148,8 @@ for dir in $DUMPDIR/*/; do
 		fi
 	fi
 
-	[ $database == "*" ]
-	nodirdb=$?
+	#[ $database == "*" ]
+	#nodirdb=$?
 
 	if [[ $nodirdb == "0" ]]
 	then
@@ -155,13 +160,13 @@ for dir in $DUMPDIR/*/; do
 	echo "Dump database: $database"
 
 	mkdir -p $DUMPDIR/$database/$ROOM
-	createDir $database
-	
+	#createDir $database
+
 	RELATIVE_OUTPUTFILE="$database/$ROOM/db_$database_$DATE.sql"
 	OUTPUTFILE="$DUMPDIR/$RELATIVE_OUTPUTFILE"
 
-	/usr/bin/mysqldump --user=$DB_USER --password=$DB_PWD --databases $database > $OUTPUTFILE && gzip $OUTPUTFILE
-	uploadBackup "$OUTPUTFILE.gz" "$RELATIVE_OUTPUTFILE.gz"
+	/jet/bin/mysqldump --user=$DB_USER --host=$DB_HOST --password=$DB_PWD --databases $database > $OUTPUTFILE && gzip $OUTPUTFILE
+	#uploadBackup "$OUTPUTFILE.gz" "$RELATIVE_OUTPUTFILE.gz"
 
 	counter=$(find $DUMPDIR/$database/$ROOM/ -maxdepth 1 -type f | wc -l)
 	#echo "Dump counter: $counter"
@@ -175,7 +180,7 @@ for dir in $DUMPDIR/*/; do
 		then
 			#echo "REMOVE FILE $cpt/$ROTATE"
 			rm $DUMPDIR/$database/$ROOM/$dump
-			deleteFile $database/$ROOM/$dump
+			#deleteFile $database/$ROOM/$dump
 		fi
 	done
 

@@ -78,7 +78,7 @@ case $i in
     echo "	-w | --ftppwd		ftp password"
     echo "	-s | --ftphost		ftp host"
     echo "	-t | --ftpport		ftp port"
-    echo "	-f | --ftpdir			ftp dir"
+    echo "	-f | --ftpdir		ftp dir (e.g: -f=files/)"
     echo "	-h | --help		shows this help"
     exit 0
     ;;

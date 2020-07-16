@@ -12,21 +12,22 @@ FTP_HOST=""
 FTP_PORT="21"
 FTP_USER=""
 FTP_PWD=""
+FTP_DIR=""
 
 for i in "$@"
 do
 case $i in
     -r=*|--rotate=*)
     ROTATE="${i#*=}"
-    shift # past argument=value
+    shift
     ;;
     -c=*|--crondir=*)
     ROOM="${i#*=}"
-    shift # past argument=value
+    shift
     ;;
     -o=*|--output=*)
     DUMPDIR="${i#*=}"
-    shift # past argument=value
+    shift
     ;;
     -z=*|--dbhost=*)
     DB_HOST="${i#*=}"
@@ -34,31 +35,35 @@ case $i in
     ;;
     -n=*|--dbuser=*)
     DB_USER="${i#*=}"
-    shift # past argument=value
+    shift
     ;;
     -p=*|--dbpwd=*)
     DB_PWD="${i#*=}"
-    shift # past argument=value
+    shift
     ;;
     -d=*|--database=*)
     DATABASEONLY="${i#*=}"
-    shift # past argument=value
+    shift
     ;;
     -u=*|--ftpuser=*)
     FTP_USER="${i#*=}"
-    shift # past argument=value
+    shift
     ;;
     -w=*|--ftppwd=*)
     FTP_PWD="${i#*=}"
-    shift # past argument=value
+    shift
     ;;
     -s=*|--ftphost=*)
     FTP_HOST="${i#*=}"
-    shift # past argument=value
+    shift
     ;;
     -t=*|--ftpport=*)
     FTP_PORT="${i#*=}"
-    shift # past argument=value
+    shift
+    ;;
+    -f=*|--ftpdir=*)
+    FTP_DIR="${i#*=}"
+    shift
     ;;
     -h|--help)
     echo "Usage: dbtf [-options]"
@@ -69,10 +74,11 @@ case $i in
     echo "	-n | --dbuser		database username"
     echo "	-p | --dbpwd		database password"
     echo "	-d | --database		dumps only a specific database"
-    echo "  	-u | --ftpuser		ftp username"
+    echo "	-u | --ftpuser		ftp username"
     echo "	-w | --ftppwd		ftp password"
     echo "	-s | --ftphost		ftp host"
     echo "	-t | --ftpport		ftp port"
+    echo "	-f | --ftpdir			ftp dir"
     echo "	-h | --help		shows this help"
     exit 0
     ;;
@@ -102,6 +108,7 @@ echo "Database User: $DB_USER"
 echo "FTP Host: $FTP_HOST"
 echo "FTP Port: $FTP_PORT"
 echo "FTP User: $FTP_USER"
+echo "FTP Dir: $FTP_DIR"
 echo "======="
 
 createDir() {
@@ -119,6 +126,7 @@ uploadBackup() {
 quote USER $FTP_USER
 quote PASS $FTP_PWD
 binary
+passive
 put $1 $2
 quit
 END_SCRIPT
@@ -159,16 +167,16 @@ for dir in $DUMPDIR/*/; do
 
 	echo "Dump database: $database"
 
-	mkdir -p $DUMPDIR/$database/$ROOM
-	#createDir $database
+	mkdir -p "$DUMPDIR/$database/$ROOM"
+	createDir "$FTP_DIR$database"
 
 	RELATIVE_OUTPUTFILE="$database/$ROOM/db_$database_$DATE.sql"
 	OUTPUTFILE="$DUMPDIR/$RELATIVE_OUTPUTFILE"
 
 	/jet/bin/mysqldump --user=$DB_USER --host=$DB_HOST --password=$DB_PWD --databases $database > $OUTPUTFILE && gzip $OUTPUTFILE
-	#uploadBackup "$OUTPUTFILE.gz" "$RELATIVE_OUTPUTFILE.gz"
+	uploadBackup "$OUTPUTFILE.gz" "$FTP_DIR$RELATIVE_OUTPUTFILE.gz"
 
-	counter=$(find $DUMPDIR/$database/$ROOM/ -maxdepth 1 -type f | wc -l)
+	counter=$(find "$DUMPDIR/$database/$ROOM/" -maxdepth 1 -type f | wc -l)
 	#echo "Dump counter: $counter"
 
 	dumps=$(ls -1 $DUMPDIR/$database/$ROOM/ | sort -r)
@@ -179,8 +187,8 @@ for dir in $DUMPDIR/*/; do
 		if [ $cpt -gt $ROTATE ]
 		then
 			#echo "REMOVE FILE $cpt/$ROTATE"
-			rm $DUMPDIR/$database/$ROOM/$dump
-			#deleteFile $database/$ROOM/$dump
+			rm "$DUMPDIR/$database/$ROOM/$dump"
+			deleteFile "$FTP_DIR$database/$ROOM/$dump"
 		fi
 	done
 

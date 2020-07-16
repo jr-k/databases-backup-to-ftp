@@ -4,17 +4,18 @@ Simple database dump rotate system  (optionnally send to ftp server)
 # help
 Usage: `dbtf [-options]`<br />
 where options include:
--	`-r | --rotate`		rotate counter (e.g: -r=10, default: 10)
+-	`-r | --rotate`		  rotate counter (e.g: -r=10, default: 10)
 -	`-c | --crondir`		cron directory, useful to store dump in different cron (e.g: -c=hourly, default: default)
--	`-o | --output`		output directory, location where dumps will be stored (e.g: -o=/home/dumps)
--	`-n | --dbuser`		database username
--	`-p | --dbpwd`		database password
+-	`-o | --output`		  output directory, location where dumps will be stored (e.g: -o=/home/dumps)
+-	`-n | --dbuser`		  database username
+-	`-p | --dbpwd`		  database password
 -	`-d | --database`		dumps only a specific database
 -	`-u | --ftpuser`		ftp username
--	`-w | --ftppwd`		ftp password
+-	`-w | --ftppwd`		  ftp password
 -	`-s | --ftphost`		ftp host
 -	`-t | --ftpport`		ftp port
--	`-h | --help`		shows this help
+-	`-f | --ftpdir`		  ftp dir (e.g: -f=files/)
+-	`-h | --help`		    shows this help
 
 Crontab entries
 - `* * * * * /usr/local/sbin/dbtf -r=60 -c="minutely1"`
